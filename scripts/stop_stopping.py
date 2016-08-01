@@ -23,6 +23,11 @@ class StopStopper:
                 for _ in range(3):
                     self.pub.publish(msg)
                     r.sleep()
+                msg.drive.speed = 1
+                msg.drive.steering_angle = 1
+                for _ in range(3):
+                    self.pub.publish(msg)
+                    r.sleep()
         else:
             self.stop_start = rospy.get_time()
 
