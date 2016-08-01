@@ -55,8 +55,8 @@ class BlobDetector:
             self.find_color(im, "red", cv2.bitwise_or(cv2.inRange(hsv, np.array([0, 150, 150]), np.array([10, 255, 255])), cv2.inRange(hsv, np.array([170, 150, 150]), np.array([180, 255, 255]))))  # red
             self.find_color(im, "green", cv2.inRange(hsv, np.array([40, 100, 100]), np.array([85, 255, 255])))  # green
             self.find_color(im, "yellow", cv2.inRange(hsv, np.array([20, 150, 150]), np.array([30, 255, 255])))  # yellow
-            self.find_color(im, "blue", cv2.inRange(hsv, np.array([90, 140, 110]), np.array([130, 255, 255])))  # blue
-            self.find_color(im, "pink", cv2.inRange(hsv, np.array([135, 80, 90]), np.array([165, 255, 255])))  # blue
+            self.find_color(im, "blue", cv2.inRange(hsv, np.array([100, 115, 55]), np.array([130, 255, 255])))  # blue
+            self.find_color(im, "pink", cv2.inRange(hsv, np.array([135, 80, 90]), np.array([165, 255, 255])))  # pink
             self.find_faces(im)  # faces
         else:
             self.find_color(im, "testing",cv2.inRange(hsv, np.array([self.hl, self.sl, self.vl]), np.array([self.hu, self.su, self.vu])))
@@ -70,7 +70,7 @@ class BlobDetector:
             if area < 500: 
                 continue
             perim = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, .03*perim, True)
+            approx = cv2.approxPolyDP(c, .02*perim, True)
             if len(approx) == 4:  # rectangle
                 rect_msg = String()
                 rect_msg.data = "{} rectangle".format(label_color)
@@ -82,10 +82,10 @@ class BlobDetector:
                 cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
                 cv2.imwrite("/home/racecar/challenge_photos1/{}rectangle{}.png".format(label_color, int(time.clock()*1000)), im)
 
-            elif abs(len(approx)-12) <= 2:  # cross
+            elif abs(len(approx)-12) <= 1:  # cross
                 cross_msg = String()
                 cross_msg.data = "{} cross".format(label_color)
-                self.pub_blobs.publish(rect_msg)
+                self.pub_blobs.publish(cross_msg)
                 moments = cv2.moments(c)
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
                 im = passed_im.copy()
@@ -93,7 +93,7 @@ class BlobDetector:
                 cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
                 cv2.imwrite("/home/racecar/challenge_photos1/{}cross{}.png".format(label_color, int(time.clock()*1000)), im)
 
-            elif len(approx) > 4:
+            elif abs(len(approx)-8) <= 2:  # circle
                 circ_msg = String()
                 circ_msg.data = "{} circle".format(label_color)
                 self.pub_blobs.publish(circ_msg)
@@ -126,13 +126,13 @@ class BlobDetector:
             print "face height: {},  eye height: {}".format(h, eh)
             if abs(h/eh - 1.5) < 1.5:
                 print "detected karaman"
-                cv2.imwrite("/home/racecar/challenge_photos/karaman{}.png".format(int(time.clock()*1000)), im)
+                cv2.imwrite("/home/racecar/challenge_photos1/karaman{}.png".format(int(time.clock()*1000)), im)
                 blob_msg = String()
                 blob_msg.data = "professor karaman"
                 self.pub_blobs.publish(blob_msg)
             elif abs(h/eh - 6) < 3:
                 print "detected ari"
-                cv2.imwrite("/home/racecar/challenge_photos/ari{}.png".format(int(time.clock()*1000)), im)
+                cv2.imwrite("/home/racecar/challenge_photos1/ari{}.png".format(int(time.clock()*1000)), im)
                 blob_msg = String()
                 blob_msg.data = "ari"
                 self.pub_blobs.publish(blob_msg)
