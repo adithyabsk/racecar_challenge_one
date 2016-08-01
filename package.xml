@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
 <package>
   <name>racecar_challenge_one</name>
-<<<<<<< HEAD
   <version>1.0.0</version>
   <description>The racecar_final package</description>
-=======
   <version>0.0.0</version>
   <description>The racecar_challenge_one package</description>
->>>>>>> b3ede084362f49a773975cd0251193be5809c906
 
   <maintainer email="adithyabsk@gmail.com">Adithya Balaji</maintainer>
   <maintainer email="czhao39@gmail.com">Charles Zhao</maintainer>
