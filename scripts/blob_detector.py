@@ -79,7 +79,7 @@ class BlobDetector:
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
                 im = passed_im.copy()
                 cv2.putText(im, "{} rectangle".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
-                cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
+                cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
                 cv2.imwrite("/home/racecar/challenge_photos1/{}rectangle{}.png".format(label_color, int(time.clock()*1000)), im)
 
             elif abs(len(approx)-12) <= 2:  # cross
@@ -90,7 +90,7 @@ class BlobDetector:
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
                 im = passed_im.copy()
                 cv2.putText(im, "{} cross".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
-                cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
+                cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
                 cv2.imwrite("/home/racecar/challenge_photos1/{}cross{}.png".format(label_color, int(time.clock()*1000)), im)
 
             elif len(approx) > 4:
@@ -101,7 +101,7 @@ class BlobDetector:
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
                 im = passed_im.copy()
                 cv2.putText(im, "{} circle".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
-                cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
+                cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
                 cv2.imwrite("/home/racecar/challenge_photos1/{}circle{}.png".format(label_color, int(time.clock()*1000)), im)
 
             #if self.isTesting:
