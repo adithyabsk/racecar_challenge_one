@@ -62,36 +62,52 @@ class BlobDetector:
             self.find_color(im, "testing",cv2.inRange(hsv, np.array([self.hl, self.sl, self.vl]), np.array([self.hu, self.su, self.vu])))
 
     def find_color(self, passed_im, label_color, mask):
-        im = passed_im.copy()
         if self.isTesting:
             self.image = im
         contours = cv2.findContours(mask, cv2.cv.CV_RETR_TREE, cv2.cv.CV_CHAIN_APPROX_SIMPLE)[0]
-        approx_contours = []
         for c in contours:
             area = cv2.contourArea(c)
             if area < 500: 
                 continue
             perim = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, .03*perim, True)
-            if len(approx) == 4 or abs(len(approx)-12) <= 2:  # rectangle or cross
-                approx_contours.append(approx)
-                blob_msg = String()
-                blob_msg.data = label_color
-                self.pub_blobs.publish(blob_msg)
+            if len(approx) == 4:  # rectangle
+                rect_msg = String()
+                rect_msg.data = "{} rectangle".format(label_color)
+                self.pub_blobs.publish(rect_msg)
                 moments = cv2.moments(c)
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
-                cv2.putText(im, "{} {}".format(label_color, len(approx)), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
-                print "Moment:  ({}, {})".format(center[0], center[1])
-                print "Label color:  {}".format(label_color)
-
-
-        if approx_contours:
-            if self.isTesting:
-                cv2.drawContours(self.image, approx_contours, -1, (100, 255, 100), 2)
-            else:
+                im = passed_im.copy()
+                cv2.putText(im, "{} rectangle".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
                 cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
-                cv2.imwrite("/home/racecar/challenge_photos/{}{}.png".format(label_color, int(time.clock()*1000)), im)
-            print "wrote photo"
+                cv2.imwrite("/home/racecar/challenge_photos1/{}rectangle{}.png".format(label_color, int(time.clock()*1000)), im)
+
+            elif abs(len(approx)-12) <= 2:  # cross
+                cross_msg = String()
+                cross_msg.data = "{} cross".format(label_color)
+                self.pub_blobs.publish(rect_msg)
+                moments = cv2.moments(c)
+                center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
+                im = passed_im.copy()
+                cv2.putText(im, "{} cross".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
+                cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
+                cv2.imwrite("/home/racecar/challenge_photos1/{}cross{}.png".format(label_color, int(time.clock()*1000)), im)
+
+            elif len(approx) > 4:
+                circ_msg = String()
+                circ_msg.data = "{} circle".format(label_color)
+                self.pub_blobs.publish(circ_msg)
+                moments = cv2.moments(c)
+                center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
+                im = passed_im.copy()
+                cv2.putText(im, "{} circle".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
+                cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
+                cv2.imwrite("/home/racecar/challenge_photos1/{}circle{}.png".format(label_color, int(time.clock()*1000)), im)
+
+            #if self.isTesting:
+            #    cv2.drawContours(self.image, approx_contours, -1, (100, 255, 100), 2)
+            #else:
+            #    cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
 
     def find_faces(self, passed_im):
         im = passed_im.copy()
