@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
-  <name>racecar_final</name>
-  <version>0.0.0</version>
+  <name>racecar_challenge_one</name>
+  <version>1.0.0</version>
   <description>The racecar_final package</description>
 
   <maintainer email="adithyabsk@gmail.com">Adithya Balaji</maintainer>
