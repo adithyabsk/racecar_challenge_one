@@ -72,17 +72,19 @@ class BlobDetector:
             if area < 500: 
                 continue
             perim = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, .05*perim, True)
-            if len(approx) == 4:
+            approx = cv2.approxPolyDP(c, .03*perim, True)
+            if len(approx) == 4 or abs(len(approx)-12) <= 2:  # rectangle or cross
                 approx_contours.append(approx)
                 blob_msg = String()
                 blob_msg.data = label_color
                 self.pub_blobs.publish(blob_msg)
                 moments = cv2.moments(c)
                 center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
-                cv2.putText(im, label_color, center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
+                cv2.putText(im, "{} {}".format(label_color, len(approx)), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
                 print "Moment:  ({}, {})".format(center[0], center[1])
                 print "Label color:  {}".format(label_color)
+
+
         if approx_contours:
             if self.isTesting:
                 cv2.drawContours(self.image, approx_contours, -1, (100, 255, 100), 2)
