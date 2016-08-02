@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 
 import numpy as np
+from skimage.measure import structural_similarity as ssim
 import cv2
 import rospy
+
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from skimage.measure import structural_similarity as ssim
 #from racecar_wk3.msg import BlobDetections
 from std_msgs.msg import String
 #from geometry_msgs.msg import Point
+
 import math
 import time
 import sys
 import RacecarUtilities
 
-SERTAC_IMG = cv2.resize(cv2.imread('sertac.png',0), (100,100), interpolation = cv2.INTER_AREA)
-ARI_IMG = cv2.resize(cv2.imread('ari.png',0), (100,100), interpolation = cv2.INTER_AREA)
-CAT_IMG = cv2.resize(cv2.imread('cat.png',0), (100,100), interpolation = cv2.INTER_AREA)
-RACECAR_IMG = cv2.resize(cv2.imread('racecar.png',0), (100,100), interpolation = cv2.INTER_AREA)
-
+SERTAC_IMG = cv2.resize(cv2.imread('/home/racecar/racecar-ws/src/racecar_challenge_one/scripts/sertac.png',0), (100,100), interpolation = cv2.INTER_AREA)
+ARI_IMG = cv2.resize(cv2.imread('/home/racecar/racecar-ws/src/racecar_challenge_one/scripts/ari.png',0), (100,100), interpolation = cv2.INTER_AREA)
+CAT_IMG = cv2.resize(cv2.imread('/home/racecar/racecar-ws/src/racecar_challenge_one/scripts/cat.png',0), (100,100), interpolation = cv2.INTER_AREA)
+RACECAR_IMG = cv2.resize(cv2.imread('/home/racecar/racecar-ws/src/racecar_challenge_one/scripts/racecar.png',0), (100,100), interpolation = cv2.INTER_AREA)
 
 class BlobDetector:
     def __init__(self):
@@ -151,58 +152,58 @@ class BlobDetector:
             #    cv2.drawContours(self.image, approx_contours, -1, (100, 255, 100), 2)
             #else:
             #    cv2.drawContours(im, approx_contours, -1, (100, 255, 100), 2)
-    def challenge_color(passed_im, label_color, mask):
-    if isTesting:
-        image = im
-    contours = cv2.findContours(mask, cv2.cv.CV_RETR_TREE, cv2.cv.CV_CHAIN_APPROX_SIMPLE)[0]
-    crop_img = None
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area < 500: 
-            continue
-        perim = cv2.arcLength(c, True)
-        approx = cv2.approxPolyDP(c, .03*perim, True)
-        if len(approx) == 4:  # rectangle
+    def challenge_color(self, passed_im, label_color, mask):
+        if self.isTesting:
+            self.image = im
+        contours = cv2.findContours(mask, cv2.cv.CV_RETR_TREE, cv2.cv.CV_CHAIN_APPROX_SIMPLE)[0]
+        crop_img = None
+        for c in contours:
+            area = cv2.contourArea(c)
+            if area < 500: 
+                continue
+            perim = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, .03*perim, True)
+            if len(approx) == 4:  # rectangle
 
-            flattenPoints = approx.reshape(4, 2) #Reshape retval of approxPolyDP to just np.ndarry() of points
-            
-            #Routine to find TopLeft Corner of a list of points returned by approxPolyDP            
-            topLeftPoints = flattenPoints.copy()  #Copy over flatten points
-            xTopRemove = topLeftPoints.T[0].argsort()[-2:] #Find the indices of the two points with the largest x values
-            for index in sorted(xTopRemove, reverse=True): #Remove those points
-                topLeftPoints = np.delete(topLeftPoints, index, axis=0)
-            yTopRemove = topLeftPoints.T[1].argsort()[:1]  #Find the index of the point with the largest y value
-            for index in sorted(yTopRemove, reverse=True): #Remove that points
-                topLeftPoints = np.delete(topLeftPoints, index, axis=0)
-            topLeft = topLeftPoints.reshape(2)
+                flattenPoints = approx.reshape(4, 2) #Reshape retval of approxPolyDP to just np.ndarry() of points
+                
+                #Routine to find TopLeft Corner of a list of points returned by approxPolyDP            
+                topLeftPoints = flattenPoints.copy()  #Copy over flatten points
+                xTopRemove = topLeftPoints.T[0].argsort()[-2:] #Find the indices of the two points with the largest x values
+                for index in sorted(xTopRemove, reverse=True): #Remove those points
+                    topLeftPoints = np.delete(topLeftPoints, index, axis=0)
+                yTopRemove = topLeftPoints.T[1].argsort()[:1]  #Find the index of the point with the largest y value
+                for index in sorted(yTopRemove, reverse=True): #Remove that points
+                    topLeftPoints = np.delete(topLeftPoints, index, axis=0)
+                topLeft = topLeftPoints.reshape(2)
 
-            #Routine to find BottomRight Corner of a list of points returned by approxPolyDP            
-            bottomRightPoints = flattenPoints.copy()  #Copy over flatten points
-            xBottomRemove = bottomRightPoints.T[1].argsort()[-2:] #Find the indices of the two points with the largest y values
-            for index in sorted(xBottomRemove, reverse=True): #Remove those points
-                bottomRightPoints = np.delete(bottomRightPoints, index, axis=0)
-            yBottomRemove = bottomRightPoints.T[0].argsort()[:1]  #Find the index of the point with the smallest x value
-            for index in sorted(yBottomRemove, reverse=True): #Remove that points
-                bottomRightPoints = np.delete(bottomRightPoints, index, axis=0)
-            bottomRight = bottomRightPoints.reshape(2)
+                #Routine to find BottomRight Corner of a list of points returned by approxPolyDP            
+                bottomRightPoints = flattenPoints.copy()  #Copy over flatten points
+                xBottomRemove = bottomRightPoints.T[1].argsort()[-2:] #Find the indices of the two points with the largest y values
+                for index in sorted(xBottomRemove, reverse=True): #Remove those points
+                    bottomRightPoints = np.delete(bottomRightPoints, index, axis=0)
+                yBottomRemove = bottomRightPoints.T[0].argsort()[:1]  #Find the index of the point with the smallest x value
+                for index in sorted(yBottomRemove, reverse=True): #Remove that points
+                    bottomRightPoints = np.delete(bottomRightPoints, index, axis=0)
+                bottomRight = bottomRightPoints.reshape(2)
 
-            x1 = topLeft[0]
-            y2 = topLeft[1]
-            x2 = bottomRight[0]
-            y1 = bottomRight[1]
-            crop_img = passed_im[y1:y2, x1:x2] # Crop from x, y, w, h -> 100, 200, 300, 400
-            classification = classify(crop_img)
+                x1 = topLeft[0]
+                y2 = topLeft[1]
+                x2 = bottomRight[0]
+                y1 = bottomRight[1]
+                crop_img = passed_im[y1:y2, x1:x2] # Crop from x, y, w, h -> 100, 200, 300, 400
+                classification = self.classify(crop_img)
 
-            rect_msg = String()
-            rect_msg.data = "{} {}".format(classification, label_color)
-            self.pub_blobs.publish(rect_msg)
-            moments = cv2.moments(c)
-            center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
-            im = passed_im.copy()
-            cv2.putText(im, "{} rectangle".format(label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
-            cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
-            cv2.imwrite("/home/racecar/challenge_photos1/{}rectangle{}.png".format(label_color, int(time.clock()*1000)), im)
-            print classification
+                rect_msg = String()
+                rect_msg.data = "{} {}".format(classification, label_color)
+                self.pub_blobs.publish(rect_msg)
+                moments = cv2.moments(c)
+                center = (int(moments['m10']/moments['m00']), int(moments['m01']/moments['m00']))
+                im = passed_im.copy()
+                cv2.putText(im, "{} {}".format(classification, label_color), center, cv2.FONT_HERSHEY_PLAIN, 2, (100, 255, 100))
+                cv2.drawContours(im, [approx], -1, (100, 255, 100), 2)
+                cv2.imwrite("/home/racecar/challenge_photos/{}{}{}.png".format(label_color, classification, int(time.clock()*1000)), im)
+                print classification
     def window_runner(self):
         cv2.imshow('HSV', cv2.resize(self.image, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA))
         k = cv2.waitKey(1) & 0xFF
